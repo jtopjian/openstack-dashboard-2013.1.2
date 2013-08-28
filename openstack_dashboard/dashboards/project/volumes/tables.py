@@ -80,7 +80,9 @@ class CreateSnapshot(tables.LinkAction):
     classes = ("ajax-modal", "btn-camera")
 
     def allowed(self, request, volume=None):
-        return volume.status == "available"
+        # jt
+        #return volume.status == "available"
+        return false
 
 
 class UpdateRow(tables.Row):

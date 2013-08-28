@@ -59,6 +59,10 @@ class UpdateProjectQuotaAction(workflows.Action):
                                          label=_("Security Groups"))
     security_group_rules = forms.IntegerField(min_value=-1,
                                               label=_("Security Group Rules"))
+    # jt
+    object_mb = forms.IntegerField(min_value=0, label=_("Object Storage (MB)"))
+    images = forms.IntegerField(min_value=0, label=_("Images"))
+    expiration = forms.CharField(max_length=50, label=_("Expiration Date"))
 
     def __init__(self, request, *args, **kwargs):
         super(UpdateProjectQuotaAction, self).__init__(request,
@@ -69,6 +73,16 @@ class UpdateProjectQuotaAction(workflows.Action):
             if field in self.fields:
                 self.fields[field].required = False
                 self.fields[field].widget = forms.HiddenInput()
+        # jt
+        if 'project_id' in args[0]:
+            project_id = args[0]['project_id']
+            self.fields['images'].initial = api.jt.get_image_quota(project_id)
+            self.fields['expiration'].initial = api.jt.get_expiration_date(project_id)
+            self.fields['object_mb'].initial = api.jt.get_object_mb_quota(project_id)
+        else:
+            self.fields['images'].initial = 5
+            self.fields['expiration'].initial = 'Information not available.'
+            self.fields['object_mb'].initial = 204800
 
     class Meta:
         name = _("Quota")
@@ -80,6 +94,9 @@ class UpdateProjectQuotaAction(workflows.Action):
 class UpdateProjectQuota(workflows.Step):
     action_class = UpdateProjectQuotaAction
     depends_on = ("project_id",)
+    # jt
+    #contributes = QUOTA_FIELDS
+    QUOTA_FIELDS = QUOTA_FIELDS + ("object_mb", "images", "expiration",)
     contributes = QUOTA_FIELDS
 
 
@@ -247,6 +264,17 @@ class CreateProject(workflows.Workflow):
                                                       role_id=role.id)
                     users_added += 1
                 users_to_add -= users_added
+
+            # jt
+            # Make sure admin is added to the project as a ResellerAdmin
+            users = api.keystone.user_list(request)
+            admin_id = [user.id for user in users if user.name == 'admin'][0]
+            reseller_admin_role_id = [role.id for role in available_roles if role.name == 'ResellerAdmin'][0]
+            api.keystone.add_tenant_user_role(request,
+                                              tenant_id=project_id,
+                                              user_id=admin_id,
+                                              role_id=reseller_admin_role_id)
+
         except:
             exceptions.handle(request, _('Failed to add %s project members '
                                          'and set project quotas.'
@@ -263,6 +291,14 @@ class CreateProject(workflows.Workflow):
                 cinder.tenant_quota_update(request,
                                            project_id,
                                            **cinder_data)
+            # jt
+            # Update the custom quotas
+            if data['images'] != 5:
+                api.jt.set_image_quota(project_id, data['images'])
+            if data['expiration'] != 'Information not available.':
+                api.jt.set_expiration_date(project_id, data['expiration'])
+            if data['object_mb'] != 204800:
+                api.jt.set_object_mb_quota(project_id, data['object_mb'])
         except:
             exceptions.handle(request, _('Unable to set project quotas.'))
         return True
@@ -393,6 +429,15 @@ class UpdateProject(workflows.Workflow):
                 cinder.tenant_quota_update(request,
                                            project_id,
                                            **cinder_data)
+            # jt
+            # Update the image quota. Default quota is hard-coded. should be fixed.
+            if data['images'] != 5:
+                api.jt.set_image_quota(project_id, data['images'])
+            if data['expiration'] != 'Information not available.':
+                api.jt.set_expiration_date(project_id, data['expiration'])
+            if data['object_mb'] != 204800:
+                api.jt.set_object_mb_quota(project_id, data['object_mb'])
+
             return True
         except:
             exceptions.handle(request, _('Modified project information and '

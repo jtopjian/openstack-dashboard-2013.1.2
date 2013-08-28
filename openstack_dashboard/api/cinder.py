@@ -51,9 +51,17 @@ def cinderclient(request):
         return None
     LOG.debug('cinderclient connection created using token "%s" and url "%s"' %
               (request.user.token.id, cinder_url))
+    # jt
+#    c = cinder_client.Client(request.user.username,
+#                             request.user.token.id,
+#                             project_id=request.user.tenant_id,
+#                             auth_url=cinder_url,
+#                             insecure=insecure,
+#                             http_log_debug=settings.DEBUG)
     c = cinder_client.Client(request.user.username,
                              request.user.token.id,
                              project_id=request.user.tenant_id,
+                             region_name=request.session.get('region_name', None),
                              auth_url=cinder_url,
                              insecure=insecure,
                              http_log_debug=settings.DEBUG)

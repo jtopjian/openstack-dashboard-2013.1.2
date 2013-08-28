@@ -33,10 +33,11 @@ class QuotaUsage(dict):
     def __getitem__(self, key):
         return self.usages[key]
 
-    def __setitem__(self, key, value):
-        raise NotImplemented("Directly setting QuotaUsage values is not "
-                             "supported. Please use the add_quota and "
-                             "tally methods.")
+    # jt
+    #def __setitem__(self, key, value):
+    #    raise NotImplemented("Directly setting QuotaUsage values is not "
+    #                         "supported. Please use the add_quota and "
+    #                         "tally methods.")
 
     def __repr__(self):
         return repr(dict(self.usages))
@@ -148,5 +149,35 @@ def tenant_quota_usages(request):
     if len(instances) == 0:
         usages.tally('cores', 0)
         usages.tally('ram', 0)
+
+    # jt
+    from openstack_dashboard import api
+    from collections import namedtuple
+
+    project_id = request.user.tenant_id
+
+    Image_quota = namedtuple('Image_quota', ['name', 'limit'])
+    Expiration_quota = namedtuple('Expiration_quota', ['name', 'limit', 'expiration_date'])
+
+    # Images
+    owned_image_count = api.jt.get_image_count(project_id, request)
+    image_limit = api.jt.get_image_quota(project_id)
+    usages['images']['quota'] = image_limit
+    usages['images']['used'] = owned_image_count
+    usages['images']['available'] = image_limit - owned_image_count
+
+    # Expiration
+    expiration_date = api.jt.get_expiration_date(project_id)
+    usages['expiration']['quota'] = -1
+    usages['expiration']['used'] = 0
+    usages['expiration']['available'] = 0
+    usages['expiration']['expiration_date'] = expiration_date
+
+    # Object Storage
+    object_mb_usage = api.jt.get_object_mb_usage(project_id)
+    object_mb_limit = api.jt.get_object_mb_quota(project_id)
+    usages['object_mb']['quota'] = object_mb_limit
+    usages['object_mb']['used']  = object_mb_usage
+    usages['object_mb']['available'] = object_mb_limit - object_mb_usage
 
     return usages

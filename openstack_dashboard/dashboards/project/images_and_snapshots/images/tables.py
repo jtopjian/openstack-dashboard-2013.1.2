@@ -65,6 +65,18 @@ class CreateImage(tables.LinkAction):
     url = "horizon:project:images_and_snapshots:images:create"
     classes = ("ajax-modal", "btn-create")
 
+    # jt
+    def allowed(self, request, image=None):
+        project_id = request.user.tenant_id
+        # Get the total number of images owned by the user
+        owned_image_count = api.jt.get_image_count(project_id, request)
+        image_limit = api.jt.get_image_quota(project_id)
+
+        if image_limit > owned_image_count:
+            return True
+        else:
+            return False
+
 
 class EditImage(tables.LinkAction):
     name = "edit"

@@ -3783,13 +3783,13 @@ body {
   background: #fafafa;
 }
 #splash .login {
-  background: #ffffff url(/static/dashboard/img/logo-splash.png) no-repeat center 35px;
+  background: #ffffff url(/static/dashboard/img/logo.png) no-repeat center 35px;
   position: absolute;
   top: 80px;
   left: 50%;
-  margin: 0 0 0 -195px;
-  padding-top: 170px;
-  width: 390px;
+  margin: 0 0 0 -310px;
+  padding-top: 270px;
+  width: 660px;
   border: 1px solid #e1e1e1;
   max-height: none;
   -webkit-border-radius: 6px;
@@ -3806,7 +3806,7 @@ body {
   width: 100%;
 }
 #splash .login form input {
-  width: 350px;
+  width: 615px;
 }
 #splash .login form select {
   width: 360px;
@@ -3847,13 +3847,13 @@ h1.brand {
   padding-bottom: 40px;
 }
 h1.brand a {
-  background: url(/static/dashboard/img/logo.png) top left no-repeat;
+  background: url(/static/dashboard/img/logo2.png) top left no-repeat;
   display: block;
   float: left;
-  width: 116px;
+  width: 163px;
   height: 123px;
   text-indent: -9999px;
-  margin-left: 56px;
+  margin-left: 32px;
   margin-top: 15px;
   margin-bottom: 25px;
 }

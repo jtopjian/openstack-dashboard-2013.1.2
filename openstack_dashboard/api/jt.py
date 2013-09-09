@@ -56,3 +56,27 @@ def set_expiration_date(project_id, expiration_date):
     with open('/etc/openstack-dashboard/dair-expiration.txt', 'w') as f:
         for k, v in dates.iteritems():
             f.write("%s:%s\n" % (k,v))
+
+def get_reseller_logos():
+  logos = {}
+  with open('/etc/openstack-dashboard/dair-reseller-logos.txt') as f:
+    for line in f:
+        line = line.strip()
+        if line != "":
+            foo = line.split(':')
+            logos[foo[0]] = foo[1]
+  return logos
+
+def get_reseller_logo(project_id):
+  logos = get_reseller_logos()
+  if project_id in logos:
+      return logos[project_id]
+  else:
+      return "Information not available."
+
+def set_reseller_logo(project_id, logo):
+  logos = get_reseller_logos()
+  logos[project_id] = logo
+  with open('/etc/openstack-dashboard/dair-reseller-logos.txt', 'w') as f:
+      for k, v in logos.iteritems():
+          f.write("%s:%s\n" % (k,v))

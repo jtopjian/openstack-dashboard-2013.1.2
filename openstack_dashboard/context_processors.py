@@ -60,4 +60,12 @@ def openstack(request):
                              region in available_regions]}
     context['regions'] = regions
 
+    # jt
+    from openstack_dashboard.api import jt
+    context['reseller_logo'] = 'logo2.png'
+    if request.user.is_authenticated():
+        reseller_logo = jt.get_reseller_logo(request.user.tenant_id)
+        if reseller_logo != 'Information not available.':
+            context['reseller_logo'] = reseller_logo
+
     return context

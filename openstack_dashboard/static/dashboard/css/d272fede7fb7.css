@@ -3847,7 +3847,8 @@ h1.brand {
   padding-bottom: 40px;
 }
 h1.brand a {
-  background: url(/static/dashboard/img/logo2.png) top left no-repeat;
+  /*background: url(/static/dashboard/img/logo2.png) top left no-repeat;*/
+  background: top left no-repeat;
   display: block;
   float: left;
   width: 163px;

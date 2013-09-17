@@ -107,6 +107,9 @@ def download_rc_file(request):
     tenant_id = request.user.tenant_id
     tenant_name = request.user.tenant_name
 
+    # jt
+    region_name = request.session['region_name']
+
     template = 'project/access_and_security/api_access/openrc.sh.template'
 
     try:
@@ -117,15 +120,23 @@ def download_rc_file(request):
         context = {'user': request.user,
                    'auth_url': keystone_url,
                    'tenant_id': tenant_id,
-                   'tenant_name': tenant_name}
+                   # jt
+                   # 'tenant_name': tenant_name}
+                   'tenant_name': tenant_name,
+                   'region_name': region_name}
 
         response = shortcuts.render(request,
                                     template,
                                     context,
                                     content_type="text/plain")
+
+        # jt
+        #response['Content-Disposition'] = ('attachment; '
+        #                                   'filename=%s-openrc.sh'
+        #                                   % tenant_name)
         response['Content-Disposition'] = ('attachment; '
-                                           'filename=%s-openrc.sh'
-                                           % tenant_name)
+                                           'filename=%s-openrc-%s.sh'
+                                           % (tenant_name, region_name))
         response['Content-Length'] = str(len(response.content))
         return response
 

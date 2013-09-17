@@ -7,6 +7,12 @@ from horizon.utils.memoized import memoized
 from openstack_dashboard.api import nova, cinder, network
 from openstack_dashboard.api.base import is_service_enabled, QuotaSet
 
+# jt
+from django.conf import settings
+from openstack_dashboard import api
+import logging
+LOG = logging.getLogger(__name__)
+
 NOVA_QUOTA_FIELDS = ("metadata_items",
                      "cores",
                      "instances",
@@ -106,7 +112,6 @@ def get_disabled_quotas(request):
         disabled_quotas.extend(CINDER_QUOTA_FIELDS)
     return disabled_quotas
 
-
 @memoized
 def tenant_quota_usages(request):
     # Get our quotas and construct our usage object.
@@ -132,32 +137,42 @@ def tenant_quota_usages(request):
                 flavors[missing] = {}
                 exceptions.handle(request, ignore=True)
 
-    usages.tally('instances', len(instances))
-    usages.tally('floating_ips', len(floating_ips))
+    # jt
+    project_id = request.user.tenant_id
+    resources = api.jt.get_used_resources(project_id)
+    floating_ips = resources.get('floating_ips', 0)
+    instances    = resources.get('instances', 0)
+    cores        = resources.get('cores', 0)
+    ram          = resources.get('ram', 0)
+    gigabytes    = resources.get('gigabytes', 0)
+    volumes      = resources.get('volumes', 0)
+
+    # jt
+    #usages.tally('instances', len(instances))
+    #usages.tally('floating_ips', len(floating_ips))
+    usages.tally('instances', instances)
+    usages.tally('floating_ips', floating_ips)
+    usages.tally('cores', cores)
+    usages.tally('ram', ram)
 
     if 'volumes' not in disabled_quotas:
-        volumes = cinder.volume_list(request)
-        usages.tally('gigabytes', sum([int(v.size) for v in volumes]))
-        usages.tally('volumes', len(volumes))
+        # jt
+        #volumes = cinder.volume_list(request)
+        #usages.tally('gigabytes', sum([int(v.size) for v in volumes]))
+        #usages.tally('volumes', len(volumes))
+        usages.tally('gigabytes', gigabytes)
+        usages.tally('volumes', volumes)
 
+    # jt
     # Sum our usage based on the flavors of the instances.
-    for flavor in [flavors[instance.flavor['id']] for instance in instances]:
-        usages.tally('cores', getattr(flavor, 'vcpus', None))
-        usages.tally('ram', getattr(flavor, 'ram', None))
+    #for flavor in [flavors[instance.flavor['id']] for instance in instances]:
+        #usages.tally('cores', getattr(flavor, 'vcpus', None))
+        #usages.tally('ram', getattr(flavor, 'ram', None))
 
     # Initialise the tally if no instances have been launched yet
     if len(instances) == 0:
         usages.tally('cores', 0)
         usages.tally('ram', 0)
-
-    # jt
-    from openstack_dashboard import api
-    from collections import namedtuple
-
-    project_id = request.user.tenant_id
-
-    Image_quota = namedtuple('Image_quota', ['name', 'limit'])
-    Expiration_quota = namedtuple('Expiration_quota', ['name', 'limit', 'expiration_date'])
 
     # Images
     owned_image_count = api.jt.get_image_count(project_id, request)

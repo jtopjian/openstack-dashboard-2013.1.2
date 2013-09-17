@@ -80,3 +80,15 @@ def set_reseller_logo(project_id, logo):
   with open('/etc/openstack-dashboard/dair-reseller-logos.txt', 'w') as f:
       for k, v in logos.iteritems():
           f.write("%s:%s\n" % (k,v))
+
+def get_used_resources(project_id):
+    import subprocess
+    resources = {}
+    cmd = 'sudo /root/novac/bin/novac quota-get-used-resources %s' % project_id
+    x = subprocess.check_output(cmd, shell=True)
+    for r in x.split("\n"):
+        r = r.strip()
+        if r:
+            (resource, used) = r.split(' ')
+            resources[resource] = used
+    return resources

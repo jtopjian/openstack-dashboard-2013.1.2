@@ -67,12 +67,14 @@ def get_reseller_logos():
                 logos[foo[0]] = foo[1]
     return logos
 
-def get_reseller_logo(project_id):
-    logos = get_reseller_logos()
-    if project_id in logos:
-        return logos[project_id]
-    else:
-        return "Information not available."
+def get_reseller_logo(domain):
+    import os.path
+    if domain not in ['nova-ab', 'nova-qc', 'nova-hl', 'nova-mi']:
+        if os.path.isfile('/usr/share/openstack-dashboard/openstack_dashboard/static/dashboard/img/%s.png' % domain):
+            return '%s.png' % domain
+        else:
+            return "Information not available."
+    return "Information not available."
 
 def set_reseller_logo(project_id, logo):
     logos = get_reseller_logos()

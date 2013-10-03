@@ -68,4 +68,12 @@ def openstack(request):
         if reseller_logo != 'Information not available.':
             context['reseller_logo'] = reseller_logo
 
+    context['reseller_splash'] = 'logo.png'
+    fqdn = request.META['HTTP_HOST']
+    domain,blah = fqdn.split('.', 1)
+    reseller_splash = jt.get_reseller_splash(domain)
+    print reseller_splash
+    if reseller_splash != 'Information not available.':
+        context['reseller_splash'] = reseller_splash
+
     return context

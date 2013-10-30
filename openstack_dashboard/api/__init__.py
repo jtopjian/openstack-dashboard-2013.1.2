@@ -33,15 +33,15 @@ In other words, Horizon developers not working on openstack_dashboard.api
 shouldn't need to understand the finer details of APIs for
 Keystone/Nova/Glance/Swift et. al.
 """
-from openstack_dashboard.api import base
-from openstack_dashboard.api import cinder
-from openstack_dashboard.api import glance
-from openstack_dashboard.api import keystone
-from openstack_dashboard.api import network
-from openstack_dashboard.api import nova
-from openstack_dashboard.api import quantum
-from openstack_dashboard.api import lbaas
-from openstack_dashboard.api import swift
+import base
+import cinder
+import glance
+import keystone
+import network
+import nova
+import quantum
+import lbaas
+import swift
 
 # jt
-from openstack_dashboard.api import jt
+import jt

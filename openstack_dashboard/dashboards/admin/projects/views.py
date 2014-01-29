@@ -75,7 +75,9 @@ class IndexView(tables.DataTableView):
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve project list."))
-        tenants.sort(key=lambda x: x.id, reverse=True)
+        # MJ - change sort in /admin/projects
+        tenants.sort(key=lambda x: x.name.lower())
+        #tenants.sort(key=lambda x: x.id, reverse=True)
         return tenants
 
 

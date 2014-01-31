@@ -49,7 +49,10 @@ def openstack(request):
     current_dash = request.horizon['dashboard']
     needs_tenants = getattr(current_dash, 'supports_tenants', False)
     if request.user.is_authenticated() and needs_tenants:
+        # MJ - Sort tenants alphabetically
+        request.user.authorized_tenants.sort(key=lambda x: x.name.lower())
         context['authorized_tenants'] = request.user.authorized_tenants
+
 
     # Region context/support
     available_regions = getattr(settings, 'AVAILABLE_REGIONS', [])

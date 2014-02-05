@@ -39,12 +39,15 @@ class BaseUserForm(forms.SelfHandlingForm):
     def __init__(self, request, *args, **kwargs):
         super(BaseUserForm, self).__init__(request, *args, **kwargs)
         # Populate tenant choices
-        tenant_choices = [('', _("Select a project"))]
+        tenant_header = [('', _("Select a project"))]
+        tenant_choices= []
 
         for tenant in api.keystone.tenant_list(request, admin=True):
             if tenant.enabled:
                 tenant_choices.append((tenant.id, tenant.name))
-        self.fields['tenant_id'].choices = tenant_choices
+
+        tenant_choices.sort(key=lambda x: x[1])
+        self.fields['tenant_id'].choices = tenant_header+tenant_choices
 
     def clean(self):
         '''Check to make sure password fields match.'''

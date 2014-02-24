@@ -18,7 +18,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+import datetime
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -82,8 +82,10 @@ class UpdateProjectQuotaAction(workflows.Action):
             self.fields['object_mb'].initial = api.jt.get_object_mb_quota(project_id)
             self.fields['reseller_logo'].initial = api.jt.get_reseller_logo(project_id)
         else:
+            future_expire_date = datetime.date.today()
+            future_expire_date = future_expire_date.replace(year=future_expire_date.year+1).strftime('%B %d, %Y')
             self.fields['images'].initial = 5
-            self.fields['expiration'].initial = 'Information not available.'
+            self.fields['expiration'].initial = future_expire_date
             self.fields['object_mb'].initial = 204800
             self.fields['reseller_logo'].initial = 'Information not available.'
 

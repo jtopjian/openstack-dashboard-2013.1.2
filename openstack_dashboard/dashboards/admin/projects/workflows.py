@@ -18,7 +18,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+#mj add datetime
+import datetime
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -82,8 +83,11 @@ class UpdateProjectQuotaAction(workflows.Action):
             self.fields['object_mb'].initial = api.jt.get_object_mb_quota(project_id)
             self.fields['reseller_logo'].initial = api.jt.get_reseller_logo(project_id)
         else:
+            #mj expiration autofill
+            future_expire_date = datetime.date.today()
+            future_expire_date = future_expire_date.replace(year=future_expire_date.year+1).strftime('%B %d, %Y')
             self.fields['images'].initial = 5
-            self.fields['expiration'].initial = 'Information not available.'
+            self.fields['expiration'].initial = future_expire_date
             self.fields['object_mb'].initial = 204800
             self.fields['reseller_logo'].initial = 'Information not available.'
 
@@ -436,14 +440,13 @@ class UpdateProject(workflows.Workflow):
                                            **cinder_data)
             # jt
             # Update the image quota. Default quota is hard-coded. should be fixed.
-            if data['images'] != 5:
-                api.jt.set_image_quota(project_id, data['images'])
-            if data['expiration'] != 'Information not available.':
-                api.jt.set_expiration_date(project_id, data['expiration'])
-            if data['object_mb'] != 204800:
-                api.jt.set_object_mb_quota(project_id, data['object_mb'])
-            if data['reseller_logo'] != 'Information not available.':
-                api.jt.set_reseller_logo(project_id, data['reseller_logo'])
+            # Unfortunately these quotas values are always written when quotas are
+            # changed as we don't have access to the pre-existing values.
+
+            api.jt.set_image_quota(project_id, data['images'])
+            api.jt.set_expiration_date(project_id, data['expiration'])
+            api.jt.set_object_mb_quota(project_id, data['object_mb'])
+            api.jt.set_reseller_logo(project_id, data['reseller_logo'])
 
             return True
         except:

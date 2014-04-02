@@ -190,6 +190,13 @@ def tenant_quota_usages(request):
     usages['expiration']['available'] = 0
     usages['expiration']['expiration_date'] = expiration_date
 
+    # Start Date
+    start_date = api.jt.get_start_date(project_id)
+    usages['start']['quota'] = -1
+    usages['start']['used'] = 0
+    usages['start']['available'] = 0
+    usages['start']['start_date'] = start_date
+
     # Object Storage
     object_mb_usage = api.jt.get_object_mb_usage(project_id)
     object_mb_limit = api.jt.get_object_mb_quota(project_id)

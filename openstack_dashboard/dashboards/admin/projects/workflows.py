@@ -65,6 +65,7 @@ class UpdateProjectQuotaAction(workflows.Action):
     images = forms.IntegerField(min_value=0, label=_("Images"))
     expiration = forms.CharField(max_length=50, label=_("Expiration Date"))
     start_date = forms.CharField(max_length=50, label=_("Start Date"))
+    dair_notice = forms.CharField(max_length=750, label=_("Notice from DAIR"), required=False)
     reseller_logo = forms.CharField(max_length=100, label=_("Reseller Logo"))
 
     def __init__(self, request, *args, **kwargs):
@@ -82,15 +83,17 @@ class UpdateProjectQuotaAction(workflows.Action):
             self.fields['images'].initial = api.jt.get_image_quota(project_id)
             self.fields['expiration'].initial = api.jt.get_expiration_date(project_id)
             self.fields['start_date'].initial = api.jt.get_start_date(project_id)
+            self.fields['dair_notice'].initial = api.jt.get_dair_notice(project_id)
             self.fields['object_mb'].initial = api.jt.get_object_mb_quota(project_id)
             self.fields['reseller_logo'].initial = api.jt.get_reseller_logo(project_id)
         else:
             #mj expiration autofill
             start_date = datetime.date.today()
-            future_expire_date = future_expire_date.replace(year=start_date.year+1).strftime('%B %d, %Y')
+            future_expire_date = start_date.replace(year=start_date.year+1).strftime('%B %d, %Y')
             self.fields['images'].initial = 5
             self.fields['expiration'].initial = future_expire_date
-            self.fields['start_date'].initial = future_start_date.strftime('%B %d, %Y')
+            self.fields['start_date'].initial = start_date.strftime('%B %d, %Y')
+            self.fields['dair_notice'].initial = 'Information not available.'
             self.fields['object_mb'].initial = 204800
             self.fields['reseller_logo'].initial = 'Information not available.'
 
@@ -106,7 +109,7 @@ class UpdateProjectQuota(workflows.Step):
     depends_on = ("project_id",)
     # jt
     #contributes = QUOTA_FIELDS
-    QUOTA_FIELDS = QUOTA_FIELDS + ("object_mb", "images", "expiration", "start_date", "reseller_logo",)
+    QUOTA_FIELDS = QUOTA_FIELDS + ("object_mb", "images", "expiration", "start_date", "dair_notice", "reseller_logo",)
     contributes = QUOTA_FIELDS
 
 
@@ -309,6 +312,8 @@ class CreateProject(workflows.Workflow):
                 api.jt.set_expiration_date(project_id, data['expiration'])
             if data['start_date'] != 'Information not available.':
                 api.jt.set_start_date(project_id, data['start_date'])
+            if data['dair_notice'] != 'Information not available.':
+                api.jt.set_dair_notice(project_id, data['dair_notice'])
             if data['object_mb'] != 204800:
                 api.jt.set_object_mb_quota(project_id, data['object_mb'])
             if data['reseller_logo'] != 'Information not available.':
@@ -451,6 +456,7 @@ class UpdateProject(workflows.Workflow):
             api.jt.set_image_quota(project_id, data['images'])
             api.jt.set_expiration_date(project_id, data['expiration'])
             api.jt.set_start_date(project_id, data['start_date'])
+            api.jt.set_dair_notice(project_id, data['dair_notice'])
             api.jt.set_object_mb_quota(project_id, data['object_mb'])
             api.jt.set_reseller_logo(project_id, data['reseller_logo'])
 

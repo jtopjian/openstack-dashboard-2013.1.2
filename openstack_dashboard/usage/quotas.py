@@ -197,6 +197,14 @@ def tenant_quota_usages(request):
     usages['start']['available'] = 0
     usages['start']['start_date'] = start_date
 
+    # DAIR Notice
+    dair_notice = api.jt.get_dair_notice(project_id)
+    usages['dair_notice']['quota'] = -1
+    usages['dair_notice']['used'] = 0
+    usages['dair_notice']['available'] = 0
+    usages['dair_notice']['dair_notice'] = dair_notice
+
+
     # Object Storage
     object_mb_usage = api.jt.get_object_mb_usage(project_id)
     object_mb_limit = api.jt.get_object_mb_quota(project_id)

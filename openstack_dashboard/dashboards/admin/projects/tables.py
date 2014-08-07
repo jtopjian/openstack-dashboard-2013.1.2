@@ -33,6 +33,14 @@ class UsageLink(tables.LinkAction):
     url = "horizon:admin:projects:usage"
     classes = ("btn-stats",)
 
+class GraphLink(tables.LinkAction):
+    name = "graph"
+    verbose_name = _("View Usage - Graph")
+    url = "horizon:admin:projects:update"
+    classes = ("btn-stats",)
+
+    def get_link_url(self, project):
+      return "".join(["http://graphite.dair-atir.canarie.ca/grafana/#/dashboard/script/dair-project.js?project=", project.id])
 
 class CreateProject(tables.LinkAction):
     name = "create"
@@ -102,7 +110,7 @@ class TenantsTable(tables.DataTable):
     class Meta:
         name = "tenants"
         verbose_name = _("Projects")
-        row_actions = (ViewMembersLink, UpdateProject, UsageLink,
+        row_actions = (ViewMembersLink, UpdateProject, UsageLink, GraphLink,
                        ModifyQuotas, DeleteTenantsAction)
         table_actions = (TenantFilterAction, CreateProject,
                          DeleteTenantsAction)

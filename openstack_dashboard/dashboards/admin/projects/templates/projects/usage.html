@@ -10,5 +10,6 @@
 
 {% block main %}
   {% include "horizon/common/_usage_summary.html" %}
+  <a href="http://graphite.dair-atir.canarie.ca/grafana/#/dashboard/script/dair-project.js?project={{ request.user.tenant_id }}">View Historical Usage Graph (External Link)</a>
   {{ table.render }}
 {% endblock %}

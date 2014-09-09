@@ -189,18 +189,32 @@ class UpdateProjectMembersAction(workflows.Action):
             self.fields[field_name].initial = []
 
         # Figure out users & roles
+        #if project_id:
+        #    for user in all_users:
+        #        try:
+        #            roles = api.keystone.roles_for_user(self.request,
+        #                                                user.id,
+        #                                                project_id)
+        #        except:
+        #            exceptions.handle(request,
+        #                              err_msg,
+        #                              redirect=reverse(INDEX_URL))
+        #        for role in roles:
+        #            self.fields["role_" + role.id].initial.append(user.id)
+        # jt
+        # backported from havana
         if project_id:
-            for user in all_users:
+            try:
+                project_members = api.keystone.user_list(request, tenant_id=project_id)
+            except Exception:
+                exceptions.handle(request, err_msg)
+            for user in project_members:
                 try:
-                    roles = api.keystone.roles_for_user(self.request,
-                                                        user.id,
-                                                        project_id)
-                except:
-                    exceptions.handle(request,
-                                      err_msg,
-                                      redirect=reverse(INDEX_URL))
+                    roles = api.keystone.roles_for_user(self.request, user.id, project_id)
+                except Exception:
+                    exceptions.handle(request, err_msg, redirect=reverse(INDEX_URL))
                 for role in roles:
-                    self.fields["role_" + role.id].initial.append(user.id)
+                        self.fields["role_" + role.id].initial.append(user.id)
 
     class Meta:
         name = _("Project Members")

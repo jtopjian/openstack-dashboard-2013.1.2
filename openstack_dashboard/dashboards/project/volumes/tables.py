@@ -82,7 +82,7 @@ class CreateSnapshot(tables.LinkAction):
     def allowed(self, request, volume=None):
         # jt
         #return volume.status == "available"
-        return false
+        return False
 
 
 class UpdateRow(tables.Row):
